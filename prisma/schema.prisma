@@ -1,0 +1,410 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships   Membership[]
+  accounts      Account[]
+  sessions      Session[]
+  createdTasks  Task[]    @relation("CreatedBy")
+  assignedTasks Task[]    @relation("AssignedTo")
+  auditLogs     AuditLog[]
+  messages      Message[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  plan        Plan     @default(STARTER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships Membership[]
+  contacts    Contact[]
+  documents   Document[]
+  transactions Transaction[]
+  invoices    Invoice[]
+  tasks       Task[]
+  messages    Message[]
+  aiInsights  AIInsight[]
+  auditLogs   AuditLog[]
+  exportJobs  ExportJob[]
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           Role         @default(STAFF)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Contact {
+  id             String        @id @default(cuid())
+  organizationId String
+  type           ContactType
+  name           String
+  email          String?
+  phone          String?
+  company        String?
+  address        String?
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  documents    Document[]
+  tasks        Task[]
+  messages     Message[]
+}
+
+model Document {
+  id             String        @id @default(cuid())
+  organizationId String
+  contactId      String?
+  type           DocumentType
+  status         DocumentStatus @default(PENDING)
+  fileName       String
+  fileUrl        String
+  fileSize       Int
+  mimeType       String
+  ocrText        String?
+  extractedData  Json?
+  reviewedAt     DateTime?
+  reviewedBy     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact?     @relation(fields: [contactId], references: [id])
+  fields       DocumentField[]
+  transactions Transaction[]
+  tasks        Task[]
+}
+
+model DocumentField {
+  id         String   @id @default(cuid())
+  documentId String
+  fieldName  String
+  fieldValue String?
+  confidence Float?
+  source     String?  // "ocr", "ai", "manual"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id             String          @id @default(cuid())
+  organizationId String
+  documentId     String?
+  type           TransactionType
+  amount         Float
+  currency       String          @default("USD")
+  date           DateTime
+  category       String?
+  description    String?
+  vendor         String?
+  status         TransactionStatus @default(UNCATEGORIZED)
+  isDuplicate    Boolean        @default(false)
+  duplicateOf    String?
+  confidence     Float?
+  reviewedAt     DateTime?
+  reviewedBy     String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document     Document?    @relation(fields: [documentId], references: [id])
+}
+
+model Invoice {
+  id             String       @id @default(cuid())
+  organizationId String
+  invoiceNumber  String       @unique
+  clientId       String?
+  amount         Float
+  currency       String       @default("USD")
+  dueDate        DateTime?
+  status         InvoiceStatus @default(DRAFT)
+  paidDate       DateTime?
+  lineItems      Json?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tasks        Task[]
+}
+
+model Task {
+  id             String     @id @default(cuid())
+  organizationId String
+  documentId     String?
+  contactId      String?
+  invoiceId      String?
+  createdById    String?
+  assignedToId   String?
+  title          String
+  description    String?
+  status         TaskStatus @default(OPEN)
+  priority       Priority   @default(MEDIUM)
+  dueDate        DateTime?
+  completedAt    DateTime?
+  isRecurring    Boolean    @default(false)
+  recurringPattern String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document     Document?    @relation(fields: [documentId], references: [id])
+  contact      Contact?     @relation(fields: [contactId], references: [id])
+  invoice      Invoice?     @relation(fields: [invoiceId], references: [id])
+  createdBy    User?        @relation("CreatedBy", fields: [createdById], references: [id])
+  assignedTo   User?        @relation("AssignedTo", fields: [assignedToId], references: [id])
+  reminders    Reminder[]
+}
+
+model Reminder {
+  id         String   @id @default(cuid())
+  taskId     String
+  remindAt   DateTime
+  sent       Boolean  @default(false)
+  sentAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  organizationId String
+  contactId      String?
+  userId         String?
+  subject        String
+  body           String
+  status         MessageStatus @default(DRAFT)
+  template       String?
+  sentAt         DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact?     @relation(fields: [contactId], references: [id])
+  user         User?        @relation(fields: [userId], references: [id])
+}
+
+model AIInsight {
+  id             String   @id @default(cuid())
+  organizationId String
+  type           InsightType
+  content        String
+  confidence     Float
+  context        Json?
+  appliedAt      DateTime?
+  appliedBy      String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String?
+  entityType     String
+  entityId       String
+  action         String
+  changes        Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id])
+}
+
+model ExportJob {
+  id             String       @id @default(cuid())
+  organizationId String
+  type           ExportType
+  status         ExportStatus @default(PENDING)
+  startDate      DateTime?
+  endDate        DateTime?
+  fileUrl        String?
+  format         String       @default("csv")
+  error          String?
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+// Enums
+enum Plan {
+  STARTER
+  PRO
+  TEAM
+}
+
+enum Role {
+  OWNER
+  STAFF
+  ACCOUNTANT
+}
+
+enum ContactType {
+  VENDOR
+  CLIENT
+  ACCOUNTANT
+  STAFF
+}
+
+enum DocumentType {
+  INVOICE
+  RECEIPT
+  BANK_STATEMENT
+  TAX_DOCUMENT
+  CONTRACT
+  PAYROLL
+  UTILITY_BILL
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  EXTRACTED
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+  TRANSFER
+}
+
+enum TransactionStatus {
+  UNCATEGORIZED
+  CATEGORIZED
+  FLAGGED
+  DUPLICATE
+  APPROVED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING
+  DONE
+  ARCHIVED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MessageStatus {
+  DRAFT
+  SENT
+  FAILED
+}
+
+enum InsightType {
+  CATEGORY_SUGGESTION
+  DUPLICATE_DETECTION
+  MISSING_INFO
+  DEADLINE_REMINDER
+  EXPENSE_SUMMARY
+  ACTION_RECOMMENDATION
+}
+
+enum ExportType {
+  BOOKKEEPING_SUMMARY
+  TRANSACTIONS
+  INVOICES
+  ACCOUNTANT_REPORT
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

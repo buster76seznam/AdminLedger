@@ -1,0 +1,171 @@
+import { prisma } from "@/lib/prisma"
+
+export async function generateBookkeepingSummary(organizationId: string, startDate?: Date, endDate?: Date) {
+  try {
+    const where: any = { organizationId }
+    if (startDate || endDate) {
+      where.date = {}
+      if (startDate) where.date.gte = startDate
+      if (endDate) where.date.lte = endDate
+    }
+
+    const transactions = await prisma.transaction.findMany({
+      where,
+      include: { document: true },
+      orderBy: { date: "desc" },
+    })
+
+    const income = transactions.filter((t: any) => t.type === "INCOME")
+    const expenses = transactions.filter((t: any) => t.type === "EXPENSE")
+
+    const totalIncome = income.reduce((sum: number, t: any) => sum + t.amount, 0)
+    const totalExpenses = expenses.reduce((sum: number, t: any) => sum + t.amount, 0)
+    const netProfit = totalIncome - totalExpenses
+
+    // Group expenses by category
+    const expensesByCategory = expenses.reduce((acc: Record<string, number>, t: any) => {
+      const category = t.category || "Uncategorized"
+      acc[category] = (acc[category] || 0) + t.amount
+      return acc
+    }, {} as Record<string, number>)
+
+    // Group income by vendor/client
+    const incomeBySource = income.reduce((acc: Record<string, number>, t: any) => {
+      const source = t.vendor || "Unknown"
+      acc[source] = (acc[source] || 0) + t.amount
+      return acc
+    }, {} as Record<string, number>)
+
+    return {
+      summary: {
+        totalIncome,
+        totalExpenses,
+        netProfit,
+        transactionCount: transactions.length,
+        incomeCount: income.length,
+        expenseCount: expenses.length,
+      },
+      expensesByCategory,
+      incomeBySource,
+      transactions: transactions.map((t: any) => ({
+        date: t.date.toISOString().split("T")[0],
+        type: t.type,
+        amount: t.amount,
+        currency: t.currency,
+        category: t.category,
+        description: t.description,
+        vendor: t.vendor,
+        status: t.status,
+        documentId: t.documentId,
+      })),
+    }
+  } catch (error) {
+    console.error("Error generating bookkeeping summary:", error)
+    throw error
+  }
+}
+
+export async function exportToCSV(data: any[], filename: string) {
+  if (data.length === 0) {
+    throw new Error("No data to export")
+  }
+
+  const headers = Object.keys(data[0])
+  const csvRows = []
+
+  // Add header row
+  csvRows.push(headers.join(","))
+
+  // Add data rows
+  for (const row of data) {
+    const values = headers.map((header) => {
+      const value = row[header]
+      // Escape quotes and wrap in quotes if contains comma
+      const stringValue = String(value ?? "")
+      if (stringValue.includes(",") || stringValue.includes('"')) {
+        return `"${stringValue.replace(/"/g, '""')}"`
+      }
+      return stringValue
+    })
+    csvRows.push(values.join(","))
+  }
+
+  return csvRows.join("\n")
+}
+
+export async function createExportJob(organizationId: string, type: string, startDate?: Date, endDate?: Date) {
+  try {
+    const exportJob = await prisma.exportJob.create({
+      data: {
+        organizationId,
+        type: type as any,
+        status: "PENDING",
+        startDate,
+        endDate,
+        format: "csv",
+      },
+    })
+
+    return exportJob
+  } catch (error) {
+    console.error("Error creating export job:", error)
+    throw error
+  }
+}
+
+export async function updateExportJob(jobId: string, status: string, fileUrl?: string, error?: string) {
+  try {
+    const updateData: any = { status }
+    if (fileUrl) updateData.fileUrl = fileUrl
+    if (error) updateData.error = error
+    if (status === "COMPLETED") updateData.completedAt = new Date()
+
+    const job = await prisma.exportJob.update({
+      where: { id: jobId },
+      data: updateData,
+    })
+
+    return job
+  } catch (error) {
+    console.error("Error updating export job:", error)
+    throw error
+  }
+}
+
+export async function generateAccountantReport(organizationId: string, startDate?: Date, endDate?: Date) {
+  try {
+    const summary = await generateBookkeepingSummary(organizationId, startDate, endDate)
+
+    const report = {
+      organizationId,
+      period: {
+        startDate: startDate?.toISOString().split("T")[0] || "All time",
+        endDate: endDate?.toISOString().split("T")[0] || "Present",
+      },
+      financialSummary: summary.summary,
+      expenseBreakdown: Object.entries(summary.expensesByCategory).map(([category, amount]) => ({
+        category,
+        amount: Number(amount),
+        percentage: ((Number(amount) / summary.summary.totalExpenses) * 100).toFixed(2),
+      })),
+      incomeSources: Object.entries(summary.incomeBySource).map(([source, amount]) => ({
+        source,
+        amount: Number(amount),
+        percentage: ((Number(amount) / summary.summary.totalIncome) * 100).toFixed(2),
+      })),
+      transactions: summary.transactions,
+      notes: [
+        "This report was generated by OpsMate AI.",
+        "All transactions have been reviewed and approved by the business owner.",
+        "Please verify all data before using for tax or financial reporting.",
+        "OpsMate AI is not a CPA and does not provide professional tax or legal advice.",
+      ],
+      generatedAt: new Date().toISOString(),
+    }
+
+    return report
+  } catch (error) {
+    console.error("Error generating accountant report:", error)
+    throw error
+  }
+}
