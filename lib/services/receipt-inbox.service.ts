@@ -14,7 +14,7 @@ export async function generateReceiptEmail(organizationId: string): Promise<stri
     if (!org.receiptEmail) {
       const slug = org.slug.toLowerCase().replace(/[^a-z0-9]/g, "")
       const randomString = Math.random().toString(36).substring(2, 8)
-      const uniqueEmail = `receipts-${slug}-${randomString}@adminledger.app`
+      const uniqueEmail = `receipts-${slug}-${randomString}@fuiledger.app`
 
       await prisma.organization.update({
         where: { id: organizationId },

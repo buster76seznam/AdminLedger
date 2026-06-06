@@ -11,7 +11,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Bot className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold">AdminLedger</span>
+            <span className="text-2xl font-bold">FuiLedger</span>
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/login">
@@ -167,7 +167,7 @@ export default function Home() {
           <Shield className="h-16 w-16 text-blue-600 mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-4">Built for Trust</h2>
           <p className="text-gray-600 mb-8">
-            AdminLedger is designed to assist, not replace. We provide tools to help you organize 
+            FuiLedger is designed to assist, not replace. We provide tools to help you organize 
             your finances, but you remain in control. All AI suggestions require your approval, 
             and every change is logged for transparency.
           </p>
@@ -191,7 +191,7 @@ export default function Home() {
       {/* CTA */}
       <section className="container mx-auto px-4 py-20 text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to Simplify Your Admin Work?</h2>
-        <p className="text-gray-600 mb-8">Join thousands of small businesses using AdminLedger</p>
+        <p className="text-gray-600 mb-8">Join thousands of small businesses using FuiLedger</p>
         <Link href="/signup">
           <Button size="lg" className="text-lg">
             Start Your Free Trial
@@ -202,7 +202,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>&copy; 2026 AdminLedger. All rights reserved.</p>
+          <p>&copy; 2026 FuiLedger. All rights reserved.</p>
         </div>
       </footer>
     </div>

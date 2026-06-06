@@ -1,10 +1,10 @@
-# AdminLedger
+# FuiLedger
 
 Your affordable admin and bookkeeping copilot for US small businesses.
 
 ## Overview
 
-AdminLedger is a SaaS application that helps small businesses (1-25 employees) manage admin work, bookkeeping prep, document intake, task follow-up, and simple accounting assistance. The app is designed for non-technical users and focuses on reducing admin time while maintaining trust and accuracy.
+FuiLedger is a SaaS application that helps small businesses (1-25 employees) manage admin work, bookkeeping prep, document intake, task follow-up, and simple accounting assistance. The app is designed for non-technical users and focuses on reducing admin time while maintaining trust and accuracy.
 
 ## Features
 

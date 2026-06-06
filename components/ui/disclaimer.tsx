@@ -7,7 +7,7 @@ export function AIDisclaimer() {
       <AlertTriangle className="h-4 w-4 text-amber-600" />
       <AlertTitle className="text-amber-900">AI Assistance Disclaimer</AlertTitle>
       <AlertDescription className="text-amber-800">
-        AdminLedger provides AI-powered assistance for administrative tasks and bookkeeping preparation. 
+        FuiLedger provides AI-powered assistance for administrative tasks and bookkeeping preparation. 
         This service is not a substitute for professional accounting, tax, or legal advice. 
         All AI suggestions should be reviewed and approved by you before being applied. 
         Consult a CPA or legal professional for tax, accounting, or legal matters.

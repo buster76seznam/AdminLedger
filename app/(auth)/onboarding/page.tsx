@@ -87,7 +87,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Welcome to AdminLedger</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to FuiLedger</h1>
           <p className="text-xl text-gray-600">Tell us about your business to personalize your experience</p>
         </div>
 

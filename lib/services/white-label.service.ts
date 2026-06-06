@@ -27,7 +27,7 @@ export async function generateWhiteLabelExport(
       metadata: {
         generatedBy: config.companyName || org.name,
         generatedAt: new Date().toISOString(),
-        branding: config.removeBranding ? "none" : "adminledger",
+        branding: config.removeBranding ? "none" : "fuiledger",
         customLogo: config.logoUrl || null,
         primaryColor: config.primaryColor || "#2563eb",
       },
