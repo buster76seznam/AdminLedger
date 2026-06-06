@@ -15,6 +15,7 @@ export async function extractDocumentData(ocrText: string, documentType: string)
 - tax: tax amount if shown
 - dueDate: due date if applicable (YYYY-MM-DD)
 - lineItems: array of items with description, quantity, and price
+- confidence: overall confidence score (0-1) for this extraction
 
 Document text:
 ${ocrText}
@@ -26,7 +27,7 @@ Return only valid JSON, no explanations.`
       messages: [
         {
           role: "system",
-          content: "You are a document extraction assistant. Extract structured data from financial documents.",
+          content: "You are a document extraction assistant. Extract structured data from financial documents. Always provide a confidence score (0-1) indicating how certain you are about the extraction.",
         },
         {
           role: "user",
@@ -42,7 +43,14 @@ Return only valid JSON, no explanations.`
       throw new Error("No content in response")
     }
 
-    return JSON.parse(content)
+    const result = JSON.parse(content)
+    
+    // Add default confidence if not provided
+    if (!result.confidence) {
+      result.confidence = 0.8
+    }
+
+    return result
   } catch (error) {
     console.error("OpenAI extraction error:", error)
     throw error
@@ -68,28 +76,41 @@ Transaction details:
 - Vendor: ${vendor}
 - Amount: $${amount}
 
-Return only the category name, no explanations.`
+Return JSON with:
+{
+  "category": "category name",
+  "confidence": 0.85
+}`
 
     const response = await openai.chat.completions.create({
       model: "meta-llama/llama-3-8b-instruct:free",
       messages: [
         {
           role: "system",
-          content: "You are a bookkeeping assistant. Categorize transactions into standard expense categories.",
+          content: "You are a bookkeeping assistant. Categorize transactions into standard expense categories. Always provide a confidence score (0-1) indicating how certain you are about the categorization.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
+      response_format: { type: "json_object" },
       temperature: 0.1,
     })
 
-    const category = response.choices[0].message.content?.trim()
-    return category || "Other"
+    const content = response.choices[0].message.content
+    if (!content) {
+      return { category: "Other", confidence: 0.5 }
+    }
+
+    const result = JSON.parse(content)
+    return {
+      category: result.category || "Other",
+      confidence: result.confidence || 0.8,
+    }
   } catch (error) {
     console.error("OpenAI categorization error:", error)
-    return "Other"
+    return { category: "Other", confidence: 0.5 }
   }
 }
 
@@ -146,11 +167,13 @@ Important guidelines:
 - Keep responses concise and clear
 - If you're not confident about something, say so
 - Provide confidence level (0-1) for your suggestions
+- Include source of information (e.g., "based on your transaction history", "general business practice")
 
 Return a JSON response with:
 {
   "answer": "your response",
   "confidence": 0.85,
+  "source": "source of information",
   "suggestedActions": ["action1", "action2"],
   "checklist": ["item1", "item2"]
 }`
@@ -160,7 +183,7 @@ Return a JSON response with:
       messages: [
         {
           role: "system",
-          content: "You are an AI admin assistant for small US businesses. Help with bookkeeping, admin tasks, and financial organization. Always be helpful but never claim to be a CPA or legal advisor.",
+          content: "You are an AI admin assistant for small US businesses. Help with bookkeeping, admin tasks, and financial organization. Always be helpful but never claim to be a CPA or legal advisor. Always provide confidence scores and sources for your suggestions.",
         },
         {
           role: "user",
@@ -176,7 +199,13 @@ Return a JSON response with:
       throw new Error("No content in response")
     }
 
-    return JSON.parse(content)
+    const result = JSON.parse(content)
+    
+    // Add default confidence and source if not provided
+    if (!result.confidence) result.confidence = 0.7
+    if (!result.source) result.source = "AI analysis"
+
+    return result
   } catch (error) {
     console.error("OpenAI chat error:", error)
     throw error

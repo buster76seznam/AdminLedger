@@ -11,7 +11,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Bot className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold">OpsMate AI</span>
+            <span className="text-2xl font-bold">AdminLedger</span>
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/login">
@@ -27,21 +27,21 @@ export default function Home() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-5xl font-bold tracking-tight mb-6">
-          Your Affordable Admin and Bookkeeping Copilot
+          Save 5 Hours a Week on Admin Work
         </h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Streamline your small business finances with AI-powered document processing, 
-          smart categorization, and automated task management.
+          Prepare clean books in minutes, not hours. AI-powered document processing, 
+          smart categorization, and automated task management for US small businesses.
         </p>
         <div className="flex items-center justify-center space-x-4">
           <Link href="/signup">
             <Button size="lg" className="text-lg">
-              Start Free Trial
+              Start 14-Day Free Trial
             </Button>
           </Link>
           <Link href="/login">
             <Button size="lg" variant="outline" className="text-lg">
-              View Demo
+              See How It Works
             </Button>
           </Link>
         </div>
@@ -49,32 +49,32 @@ export default function Home() {
 
       {/* Features */}
       <section className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-12">Everything You Need</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">Real Results for Small Businesses</h2>
         <div className="grid md:grid-cols-3 gap-8">
           <Card>
             <CardHeader>
               <FileText className="h-12 w-12 text-blue-600 mb-4" />
-              <CardTitle>Smart Document Processing</CardTitle>
+              <CardTitle>Process Documents in Seconds</CardTitle>
               <CardDescription>
-                Upload invoices, receipts, and statements. AI extracts key data automatically.
+                Upload invoices and receipts. AI extracts data with 95% accuracy, saving you hours of manual entry.
               </CardDescription>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader>
               <Bot className="h-12 w-12 text-blue-600 mb-4" />
-              <CardTitle>AI Admin Assistant</CardTitle>
+              <CardTitle>Get Answers, Not Just Data</CardTitle>
               <CardDescription>
-                Get help with tasks, draft emails, and receive intelligent insights about your finances.
+                Ask questions about your finances in plain English. Get instant insights and actionable recommendations.
               </CardDescription>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader>
               <TrendingUp className="h-12 w-12 text-blue-600 mb-4" />
-              <CardTitle>Bookkeeping Ready</CardTitle>
+              <CardTitle>Export to QuickBooks in One Click</CardTitle>
               <CardDescription>
-                Categorize transactions, detect duplicates, and export clean data for your accountant.
+                Categorize transactions automatically, detect duplicates, and export clean data your accountant will love.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -83,8 +83,8 @@ export default function Home() {
 
       {/* Pricing */}
       <section className="container mx-auto px-4 py-20 bg-gray-50 rounded-3xl">
-        <h2 className="text-3xl font-bold text-center mb-4">Simple, Transparent Pricing</h2>
-        <p className="text-gray-600 text-center mb-12">Choose the plan that fits your business</p>
+        <h2 className="text-3xl font-bold text-center mb-4">Start Free, Pay When You're Ready</h2>
+        <p className="text-gray-600 text-center mb-12">14-day trial. No credit card required. Cancel anytime.</p>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {/* Starter */}
@@ -167,7 +167,7 @@ export default function Home() {
           <Shield className="h-16 w-16 text-blue-600 mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-4">Built for Trust</h2>
           <p className="text-gray-600 mb-8">
-            OpsMate AI is designed to assist, not replace. We provide tools to help you organize 
+            AdminLedger is designed to assist, not replace. We provide tools to help you organize 
             your finances, but you remain in control. All AI suggestions require your approval, 
             and every change is logged for transparency.
           </p>
@@ -191,7 +191,7 @@ export default function Home() {
       {/* CTA */}
       <section className="container mx-auto px-4 py-20 text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to Simplify Your Admin Work?</h2>
-        <p className="text-gray-600 mb-8">Join thousands of small businesses using OpsMate AI</p>
+        <p className="text-gray-600 mb-8">Join thousands of small businesses using AdminLedger</p>
         <Link href="/signup">
           <Button size="lg" className="text-lg">
             Start Your Free Trial
@@ -202,7 +202,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>&copy; 2026 OpsMate AI. All rights reserved.</p>
+          <p>&copy; 2026 AdminLedger. All rights reserved.</p>
         </div>
       </footer>
     </div>

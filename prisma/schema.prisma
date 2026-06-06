@@ -67,12 +67,20 @@ model VerificationToken {
 }
 
 model Organization {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
-  slug        String   @unique
-  plan        Plan     @default(STARTER)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slug        String       @unique
+  plan        Plan         @default(STARTER)
+  businessType BusinessType @default(FREELANCER)
+  receiptEmail String?     @unique
+  trialEndsAt DateTime?
+  dataRetentionDays Int     @default(365)
+  autoDeleteEnabled Boolean @default(false)
+  setupFeePaid Boolean     @default(false)
+  setupFeeAmount Float?
+  addons      Json?        // Store add-on subscriptions
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   memberships Membership[]
   contacts    Contact[]
@@ -84,6 +92,9 @@ model Organization {
   aiInsights  AIInsight[]
   auditLogs   AuditLog[]
   exportJobs  ExportJob[]
+  categorizationRules CategorizationRule[]
+  notifications Notification[]
+  templates   Template[]
 }
 
 model Membership {
@@ -131,8 +142,12 @@ model Document {
   mimeType       String
   ocrText        String?
   extractedData  Json?
+  confidence     Float?
   reviewedAt     DateTime?
   reviewedBy     String?
+  approvedAt     DateTime?
+  approvedBy     String?
+  requiresApproval Boolean    @default(true)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -173,6 +188,9 @@ model Transaction {
   confidence     Float?
   reviewedAt     DateTime?
   reviewedBy     String?
+  approvedAt     DateTime?
+  approvedBy     String?
+  requiresApproval Boolean       @default(true)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -278,6 +296,9 @@ model AuditLog {
   entityId       String
   action         String
   changes        Json?
+  oldValue       Json?
+  newValue       Json?
+  source         String?  // "ai", "manual", "import", "api"
   ipAddress      String?
   userAgent      String?
   createdAt      DateTime @default(now())
@@ -308,6 +329,15 @@ enum Plan {
   STARTER
   PRO
   TEAM
+}
+
+enum BusinessType {
+  FREELANCER
+  AGENCY
+  TRADES
+  CONSULTANT
+  LOCAL_SERVICE
+  ECOMMERCE
 }
 
 enum Role {
@@ -407,4 +437,48 @@ enum ExportStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+model CategorizationRule {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  condition      String   // JSON string with rule conditions
+  category       String
+  priority       Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String?
+  type           String   // "approval", "reminder", "alert", "info"
+  title          String
+  message        String
+  link           String?
+  isRead         Boolean  @default(false)
+  readAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Template {
+  id             String   @id @default(cuid())
+  organizationId String
+  type           String   // "email", "checklist", "invoice"
+  name           String
+  subject        String?
+  body           String
+  variables      Json?    // JSON array of variable names
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }

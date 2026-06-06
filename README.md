@@ -1,10 +1,10 @@
-# OpsMate AI
+# AdminLedger
 
 Your affordable admin and bookkeeping copilot for US small businesses.
 
 ## Overview
 
-OpsMate AI is a SaaS application that helps small businesses (1-25 employees) manage admin work, bookkeeping prep, document intake, task follow-up, and simple accounting assistance. The app is designed for non-technical users and focuses on reducing admin time while maintaining trust and accuracy.
+AdminLedger is a SaaS application that helps small businesses (1-25 employees) manage admin work, bookkeeping prep, document intake, task follow-up, and simple accounting assistance. The app is designed for non-technical users and focuses on reducing admin time while maintaining trust and accuracy.
 
 ## Features
 
