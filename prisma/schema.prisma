@@ -79,6 +79,12 @@ model Organization {
   setupFeePaid Boolean     @default(false)
   setupFeeAmount Float?
   addons      Json?        // Store add-on subscriptions
+  // AI Usage Tracking
+  monthlyTokenLimit Int     @default(100000) // Token limit per month
+  currentMonthTokens Int    @default(0) // Tokens used this month
+  monthlyCostLimit Float    @default(15.0) // Monthly cost limit in USD
+  currentMonthCost Float    @default(0.0) // Current month cost in USD
+  tokenResetDate DateTime?  // When token counter resets
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -95,6 +101,7 @@ model Organization {
   categorizationRules CategorizationRule[]
   notifications Notification[]
   templates   Template[]
+  aiUsageLogs AIUsageLog[]
 }
 
 model Membership {
@@ -333,10 +340,11 @@ enum Plan {
 
 enum BusinessType {
   FREELANCER
+  CONTRACTOR
+  LOCAL_SERVICE
   AGENCY
   TRADES
   CONSULTANT
-  LOCAL_SERVICE
   ECOMMERCE
 }
 
@@ -479,6 +487,21 @@ model Template {
   isDefault      Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model AIUsageLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String?
+  taskType       String   // "document_extraction", "categorization", "chat", "email_drafting"
+  modelUsed      String   // "gpt-4o-mini", "claude-3.5-sonnet", etc.
+  tokensUsed     Int
+  costUsd        Float
+  confidence     Float?
+  metadata       Json?    // Additional context about the request
+  createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }

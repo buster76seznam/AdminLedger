@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     // Process document asynchronously (in production, use a job queue)
     // For now, we'll process it synchronously
     try {
-      await processDocument(document.id)
+      await processDocument(document.id, session.user.id)
     } catch (error) {
       console.error("Error processing document:", error)
       // Don't fail the upload if processing fails
